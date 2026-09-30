@@ -43,13 +43,14 @@ places:
 
 ## Index
 
-Nothing has been accepted into a staged plan yet -- there's no app
-code to stage work against. This index stays empty until the first
-proposal is accepted.
+One accepted plan so far. It is the first segment of the "divide the
+app into segments, ship one at a time" approach: the classic
+Notepad++ shell, with the File menu prioritised above everything
+else. Frontend stages come first, backend stages last.
 
 | File | Covers |
 | --- | --- |
-| _(none yet)_ | |
+| [`CLASSIC-SHELL-ADDENDUM.md`](CLASSIC-SHELL-ADDENDUM.md) | The classic Notepad++ window shell on open (title bar, menu bar, toolbar, tabs, editor pane, status bar) with File taken all the way to working. Five stages: static shell, File dropdown, toolbar/tabs/status bar (all frontend), then Flask File endpoints and serving it as one app (backend). Stage 1 of 5 planned, nothing shipped. |
 
 ## Contributing
 
