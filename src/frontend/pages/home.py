@@ -6,6 +6,7 @@ from content.site_content import APP_TITLE, FAVICON, PAGE_DESCRIPTION, PAGE_TITL
 
 def home():
     return Page(
+        State("file_menu_open", False),
         Container(
             title_bar(APP_TITLE),
             menu_bar(),

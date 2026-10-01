@@ -1,12 +1,12 @@
 # include <stdlib.ARKlight>
 
-"""The classic Notepad++ window chrome -- Stage 1 of
-docs/implementation/CLASSIC-SHELL-ADDENDUM.md: a static match for the
-reference screenshot, no `State`, no `on_click`, nothing dynamic.
-Stage 2 gives the File menu a working dropdown; Stage 3 wakes up the
-toolbar/tabs/status-bar fields that can be computed client-side. Both
-build directly on the markup and class names below, so names here are
-picked to still make sense once they do.
+"""The classic Notepad++ window chrome -- Stage 1 (static shell) and
+Stage 2 (File menu opens/closes) of
+docs/implementation/CLASSIC-SHELL-ADDENDUM.md. Everything except
+`menu_bar()`'s File item and its dropdown is still exactly Stage 1:
+hard-coded, no `State`, no `on_click`. File is the one piece of
+interactivity this file carries, and deliberately the only one --
+every other menu-bar label stays a plain, inert `Span`.
 
 `register_styles(site)` must be called once, before any page that
 uses these components is built (see site.py) -- it's where every
@@ -14,6 +14,7 @@ uses these components is built (see site.py) -- it's where every
 """
 
 from content.site_content import (
+    FILE_MENU_ITEMS,
     GUTTER_LINE_COUNT,
     MENU_LABELS,
     STATUS_SEGMENTS,
@@ -96,11 +97,56 @@ def register_styles(site):
         "border-bottom": "1px solid #d9d9d9",
         "padding-left": "4px",
         "font-size": "12.5px",
+        "position": "relative",
+        "z-index": "20",
     })
     site.style("np-menu-item", {
         "padding": "2px 8px",
         "border-radius": "2px",
         ":hover:background": "#cce4f7",
+    })
+    site.style("np-menu-file", {
+        "position": "relative",
+    })
+
+    # -- File dropdown (Stage 2) -------------------------------------------
+    site.style("np-menu-backdrop", {
+        "position": "fixed",
+        "top": "0",
+        "left": "0",
+        "right": "0",
+        "bottom": "0",
+        "z-index": "10",
+        "background": "transparent",
+    })
+    site.style("np-file-dropdown", {
+        "position": "absolute",
+        "top": "100%",
+        "left": "0",
+        "z-index": "30",
+        "min-width": "260px",
+        "padding": "4px 0",
+        "background": "#ffffff",
+        "border": "1px solid #c6c6c6",
+        "box-shadow": "2px 2px 6px rgba(0, 0, 0, 0.18)",
+    })
+    site.style("np-file-item", {
+        "display": "flex",
+        "align-items": "center",
+        "justify-content": "space-between",
+        "gap": "24px",
+        "padding": "4px 20px 4px 28px",
+        "white-space": "nowrap",
+        ":hover:background": "#cce4f7",
+    })
+    site.style("np-file-item-hint", {
+        "color": "#888888",
+        "font-size": "11px",
+    })
+    site.style("np-file-sep", {
+        "border": "none",
+        "border-top": "1px solid #e4e4e4",
+        "margin": "4px 8px",
     })
 
     # -- Toolbar ----------------------------------------------------------
@@ -246,11 +292,55 @@ def title_bar(title):
     )
 
 
+def file_dropdown():
+    rows = []
+    for item in FILE_MENU_ITEMS:
+        if item.get("separator"):
+            rows.append(HorizontalRule(class_name="np-file-sep"))
+            continue
+        if item.get("submenu"):
+            hint = "\u25b8"
+            row = Container(
+                Span(item["label"], class_name="np-file-item-label"),
+                Span(hint, class_name="np-file-item-hint"),
+                class_name="np-file-item",
+            )
+        else:
+            hint = item.get("shortcut", "")
+            row = Container(
+                Span(item["label"], class_name="np-file-item-label"),
+                Span(hint, class_name="np-file-item-hint"),
+                class_name="np-file-item",
+                # No real New/Open/Save/... behavior yet (Stage 4) --
+                # clicking an item just closes the dropdown, the same
+                # way a real menu would, without claiming to do the
+                # file operation it's labeled for.
+                on_click=Action.set("file_menu_open", False),
+            )
+        rows.append(row)
+    return Container(*rows, class_name="np-file-dropdown")
+
+
 def menu_bar():
-    return Container(
-        *[Span(label, class_name="np-menu-item") for label in MENU_LABELS],
-        class_name="np-menubar",
+    file_item = Container(
+        Span("File", class_name="np-menu-item", on_click=Action.toggle_bool("file_menu_open")),
+        Show(Predicate.truthy("file_menu_open"), file_dropdown()),
+        class_name="np-menu-file",
     )
+    other_items = [Span(label, class_name="np-menu-item") for label in MENU_LABELS[1:]]
+    # Full-viewport click-catcher, shown only while the dropdown is
+    # open, stacked below the menu bar (z-index 10 vs. 20) so a click
+    # back on "File" itself still reaches File's own `on_click`
+    # instead of the backdrop -- the "click outside closes it" half of
+    # Stage 2's done-when criterion. There's no Escape-key equivalent:
+    # ARKlight has no keydown/key-press primitive yet, so that half of
+    # the addendum's original Stage 2 wording is deferred, not faked --
+    # see the addendum's Stage 2 section for the amendment.
+    backdrop = Show(
+        Predicate.truthy("file_menu_open"),
+        Container(class_name="np-menu-backdrop", on_click=Action.set("file_menu_open", False)),
+    )
+    return Container(file_item, *other_items, backdrop, class_name="np-menubar")
 
 
 def toolbar():

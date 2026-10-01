@@ -1,10 +1,10 @@
 # Classic Shell Addendum: Staged Order
 
-**Status:** Accepted. Stage 1 of 5 SHIPPED. This is the first segment
-of the larger "divide the app into segments, ship one at a time" plan
--- everything else on that list (Edit menu, Search menu, the actual
-editing engine, tabs-with-real-documents, and so on) is out of scope
-here and waits for its own addendum once this one ships.
+**Status:** Accepted. Stage 1 and 2 of 5 SHIPPED. This is the first
+segment of the larger "divide the app into segments, ship one at a
+time" plan -- everything else on that list (Edit menu, Search menu,
+the actual editing engine, tabs-with-real-documents, and so on) is
+out of scope here and waits for its own addendum once this one ships.
 
 We are not trying to rebuild Notepad++ end to end in one pass. We are
 taking the single most load-bearing piece of "does this look and feel
@@ -108,7 +108,7 @@ for now (no `State`, no `on_click`, nothing dynamic).
   pixel-diff, but enough to fail loudly if a future edit reorders or
   drops a region. No `arklight.js` in the build output, as expected.
 
-## Stage 2 of 5 -- File menu opens and closes (frontend only)
+## Stage 2 of 5 -- File menu opens and closes (frontend only) -- SHIPPED
 
 The one menu this addendum is actually about, made interactive. Still
 zero backend -- this stage is ARKlight's `State`/`Bind`/`Action`
@@ -116,8 +116,7 @@ vocabulary and nothing else.
 
 - `State("file_menu_open", False)` gates the File dropdown's
   visibility; clicking "File" in the menu bar toggles it
-  (`Action.toggle_bool`), clicking anywhere outside it or pressing
-  `Escape` closes it.
+  (`Action.toggle_bool`), clicking anywhere outside it closes it.
 - The dropdown itself, populated with Notepad++'s classic File-menu
   items in their classic order (New, New Window, Open..., Open
   Folder..., Open in Explorer, Reload, Save, Save As..., Save a
@@ -132,6 +131,30 @@ vocabulary and nothing else.
 - **Done when:** clicking "File" opens a dropdown that looks and
   orders itself like the reference, closes correctly, and every other
   menu remains visibly, deliberately unclickable.
+- **Amendment -- "pressing Escape closes it" is deferred, not built:**
+  the line above was this stage's original ask, written before a
+  closer read of ARKlight's vocabulary. There is currently no
+  keydown/key-press primitive in ARKlight at all -- `Action.*` fires
+  only from `on_click`, and there's no `on_keydown`/global listener
+  mechanism to hang an Escape handler off of. "Click outside closes
+  it" *is* fully buildable without one (a full-viewport backdrop,
+  `Show`-gated by the same `file_menu_open` state, stacked under the
+  menu bar via plain `z-index` so a click back on "File" still reaches
+  File's own handler) and is what actually shipped. Escape-to-close
+  waits for ARKlight to grow a keyboard-event primitive -- tracked as
+  a gap, not silently dropped or faked with something that only looks
+  like it works.
+- **Where it lives:** `components/shell.py`'s `file_dropdown()` and
+  the rewritten `menu_bar()`; `content/site_content.py`'s
+  `FILE_MENU_ITEMS` (labels, order, grouping, shortcut hints --
+  `New`/`Open`/`Save`/`Save As`/`Close`/`Print`/`Exit` are the
+  commonly-known defaults, not checked against a live Notepad++
+  install; left blank elsewhere rather than guessed); `pages/home.py`
+  declares `State("file_menu_open", False)` on the `Page`. Four new
+  tests in `tests/test_site.py` cover: File has real `on_click`
+  wiring and the other twelve don't; dropdown items render in classic
+  order; Recent Files has no click behavior (no real submenu this
+  stage); the backdrop closes the menu via the same state key.
 
 ## Stage 3 of 5 -- Toolbar, tabs, and status bar come alive (frontend only)
 

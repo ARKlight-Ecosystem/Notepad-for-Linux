@@ -23,6 +23,41 @@ MENU_LABELS = [
     "Settings", "Tools", "Macro", "Run", "Plugins", "Window", "?",
 ]
 
+# File dropdown, Stage 2 -- classic Notepad++ order and grouping.
+# `shortcut`: commonly-known defaults (New/Open/Save/Save As/Close/
+# Print/Exit) -- not independently checked against a live Notepad++
+# install, left blank rather than guessed where uncertain. `submenu`:
+# renders a `\u25b8` disclosure glyph instead of a shortcut; Recent
+# Files doesn't get a real submenu this stage (out of scope -- see
+# the addendum), just the classic affordance, and gets no `on_click`
+# so it can't pretend to do something it doesn't.
+FILE_MENU_ITEMS = [
+    {"label": "New", "shortcut": "Ctrl+N"},
+    {"label": "New Window", "shortcut": ""},
+    {"separator": True},
+    {"label": "Open...", "shortcut": "Ctrl+O"},
+    {"label": "Open Folder...", "shortcut": ""},
+    {"label": "Open in Explorer", "shortcut": ""},
+    {"label": "Reload", "shortcut": ""},
+    {"separator": True},
+    {"label": "Save", "shortcut": "Ctrl+S"},
+    {"label": "Save As...", "shortcut": "Ctrl+Alt+S"},
+    {"label": "Save a Copy As...", "shortcut": ""},
+    {"label": "Save All", "shortcut": ""},
+    {"label": "Rename", "shortcut": ""},
+    {"separator": True},
+    {"label": "Close", "shortcut": "Ctrl+W"},
+    {"label": "Close All", "shortcut": ""},
+    {"label": "Close All but Current", "shortcut": ""},
+    {"separator": True},
+    {"label": "Recent Files", "submenu": True},
+    {"separator": True},
+    {"label": "Print", "shortcut": "Ctrl+P"},
+    {"label": "Print Now", "shortcut": ""},
+    {"separator": True},
+    {"label": "Exit", "shortcut": "Alt+F4"},
+]
+
 # Toolbar icon strip, left to right, grouped the way the reference
 # screenshot groups them (a gap marks a divider). Stage 1 draws these
 # as plain static placeholders -- real icon artwork is a later pass,

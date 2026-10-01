@@ -9,13 +9,15 @@ client-side behavior, it's expressed through ARKlight's
 
 ## Status
 
-Stage 1 of
+Stages 1 and 2 of
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](../../docs/implementation/CLASSIC-SHELL-ADDENDUM.md)
-is shipped: `arklight build site.py` produces a static, one-route
-classic Notepad++ shell -- title bar, menu bar, toolbar, tab strip,
-editor pane with line-number gutter, status bar -- matching the
-reference screenshot's regions, order, and proportions. Nothing is
-interactive yet; that's Stage 2.
+are shipped: `arklight build site.py` produces a classic Notepad++
+shell -- title bar, menu bar, toolbar, tab strip, editor pane with
+line-number gutter, status bar -- matching the reference screenshot's
+regions, order, and proportions, with a working File dropdown (opens
+on click, closes on an outside click, items in classic order with
+shortcut hints). The other twelve menu-bar labels are still inert;
+that's a future addendum each.
 
 ## What belongs here
 
