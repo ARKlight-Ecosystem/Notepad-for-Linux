@@ -1,0 +1,6 @@
+# Interim delivery mechanism only -- see desktop.py's module docstring.
+# Not Stage 4/5 of docs/implementation/CLASSIC-SHELL-ADDENDUM.md; those
+# stages will add their own real requirements (Flask stays, pywebview
+# doesn't necessarily) when they land.
+flask>=3.1
+pywebview>=5.0

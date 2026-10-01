@@ -1,5 +1,6 @@
 *.patch
 *.txt
+!src/backend/requirements.txt
 
 .venv/
 __pycache__/

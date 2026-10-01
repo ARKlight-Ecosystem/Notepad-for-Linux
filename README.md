@@ -10,8 +10,13 @@ feature reference -- not something this project builds or ships.
 
 ## Status
 
-Early scaffolding. No app code yet -- this commit initializes the
-documentation lifecycle the project will use as it grows. See
+Stage 1 of the classic shell is shipped -- see
+[`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](docs/implementation/CLASSIC-SHELL-ADDENDUM.md).
+`src/frontend/` builds a static, pixel-checked match for the classic
+Notepad++ window chrome; `src/backend/` serves it in a real native
+window via Flask + pywebview, an interim stand-in for ARKlight's own
+desktop backend (not on `main` yet). Nothing is interactive or reads/
+writes a real file yet -- that's Stages 2 onward. See
 [`docs/README.md`](docs/README.md) for where things live and why.
 
 ## Stack
@@ -25,6 +30,12 @@ documentation lifecycle the project will use as it grows. See
   the compiled ARKlight output and handling everything that needs a
   real process: reading/writing files on disk, search, and whatever
   else a text editor needs that a static compiler can't do alone.
+- **Native window (interim)** -- [pywebview](https://pywebview.flowrl.com/)
+  opens the Flask-served output in a real OS window instead of a
+  browser tab, so the classic shell's title bar can eventually control
+  an actual window. A stand-in for ARKlight's own native desktop
+  backend until that ships -- see
+  [`src/backend/README.md`](src/backend/README.md).
 
 ## Documentation
 

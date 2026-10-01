@@ -1,11 +1,10 @@
 # Classic Shell Addendum: Staged Order
 
-**Status:** Accepted. Stage 1 of 5 PLANNED, nothing shipped yet. This
-is the first segment of the larger "divide the app into segments,
-ship one at a time" plan -- everything else on that list (Edit menu,
-Search menu, the actual editing engine, tabs-with-real-documents,
-and so on) is out of scope here and waits for its own addendum once
-this one ships.
+**Status:** Accepted. Stage 1 of 5 SHIPPED. This is the first segment
+of the larger "divide the app into segments, ship one at a time" plan
+-- everything else on that list (Edit menu, Search menu, the actual
+editing engine, tabs-with-real-documents, and so on) is out of scope
+here and waits for its own addendum once this one ships.
 
 We are not trying to rebuild Notepad++ end to end in one pass. We are
 taking the single most load-bearing piece of "does this look and feel
@@ -43,7 +42,37 @@ it's unimportant, but because it's the one part of this addendum that
 can't be verified by looking at the screen -- everything upstream of
 it can.
 
-## Stage 1 of 5 -- Static shell, no interactivity (frontend only)
+## A delivery-mechanism amendment: pywebview, ahead of schedule
+
+One piece of "look and feel like Notepad++" can't be settled by
+ARKlight output alone, no matter how pixel-faithful it is: the title
+bar's minimize/maximize/close/drag are real OS window actions in the
+reference screenshot, and a page sitting in an ordinary browser tab
+has no way to grant itself control over its own window for any of
+them -- that's a browser security boundary, not an ARKlight gap.
+ARKlight's own native desktop backend (GTK3 + WebKit2GTK) is the
+eventual, correct answer to that, and isn't on `main` yet.
+
+Rather than let Stage 1 sit un-openable-as-a-real-window until that
+backend ships, `src/backend/` now carries a minimal Flask app
+(`app.py`) that serves the `arklight build` output as static files,
+and `desktop.py`, which opens that same served page inside a real,
+native OS window via [pywebview](https://pywebview.flowrl.com/)
+instead of a browser tab. This is *not* Stage 4 or Stage 5 -- no
+File-menu endpoint exists yet, and the OS's own title bar stays on
+(`frameless=False`) precisely because Stage 1's drawn
+minimize/maximize/close row is still cosmetic, so going frameless now
+would trade "two title bars" for "zero working ones." It's narrowly
+the "serve the build as one app" half of Stage 5, pulled forward
+because it was the only way to get a real window to pixel-check Stage
+1 against in the first place. Stage 5, when its turn comes, is what
+replaces `pywebview` with ARKlight's own native backend (or formally
+keeps `pywebview`, if that native backend still isn't ready) and wires
+Stage 4's real File-menu routes into the drawn menu's `on_click`
+targets -- this amendment only covers getting pixels on screen in a
+real window, nothing more.
+
+## Stage 1 of 5 -- Static shell, no interactivity (frontend only) -- SHIPPED
 
 Pure ARKlight output: a `Page` that renders the whole window chrome as
 plain markup, with every value the classic look depends on hard-coded
@@ -69,6 +98,15 @@ for now (no `State`, no `on_click`, nothing dynamic).
   -- same regions, same order, same proportions. No `arklight.js`
   runtime is even expected to ship yet, since nothing on the page is
   stateful.
+- **Where it lives:** `src/frontend/components/shell.py` (markup +
+  `register_styles`), `src/frontend/content/site_content.py`
+  (every hard-coded value above, named and commented so Stage 2/3
+  know exactly what they're replacing), `src/frontend/pages/home.py`,
+  `src/frontend/site.py`. `src/frontend/tests/test_site.py` checks
+  the eight regions render in the reference screenshot's order and
+  all thirteen menu labels are present and correctly ordered -- not a
+  pixel-diff, but enough to fail loudly if a future edit reorders or
+  drops a region. No `arklight.js` in the build output, as expected.
 
 ## Stage 2 of 5 -- File menu opens and closes (frontend only)
 
@@ -151,7 +189,14 @@ on their own); this stage is what makes opening the app mean
 "classic-looking Notepad++ shell, with a working File menu,
 served from one place."
 
-- `arklight build` output wired as the static asset Flask serves.
+- `arklight build` output wired as the static asset Flask serves --
+  **already in place**, ahead of schedule, as `src/backend/app.py`;
+  see "A delivery-mechanism amendment" above for why. What's still
+  actually Stage 5's own work: swapping `pywebview` for ARKlight's
+  native backend once it exists (or formally keeping `pywebview`, a
+  maintainer call to make when that backend actually ships, not now),
+  and flipping `desktop.py`'s window to `frameless=True` once the
+  drawn title bar's buttons are real.
 - Flask's File-menu routes reachable from the compiled frontend's
   `on_click` targets in place of Stage 2-4's placeholders.
 - **Done when:** running the app end to end -- one command, one

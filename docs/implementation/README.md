@@ -50,7 +50,7 @@ else. Frontend stages come first, backend stages last.
 
 | File | Covers |
 | --- | --- |
-| [`CLASSIC-SHELL-ADDENDUM.md`](CLASSIC-SHELL-ADDENDUM.md) | The classic Notepad++ window shell on open (title bar, menu bar, toolbar, tabs, editor pane, status bar) with File taken all the way to working. Five stages: static shell, File dropdown, toolbar/tabs/status bar (all frontend), then Flask File endpoints and serving it as one app (backend). Stage 1 of 5 planned, nothing shipped. |
+| [`CLASSIC-SHELL-ADDENDUM.md`](CLASSIC-SHELL-ADDENDUM.md) | The classic Notepad++ window shell on open (title bar, menu bar, toolbar, tabs, editor pane, status bar) with File taken all the way to working. Five stages: static shell, File dropdown, toolbar/tabs/status bar (all frontend), then Flask File endpoints and serving it as one app (backend). Stage 1 of 5 shipped; a delivery-mechanism amendment (Flask + pywebview, ahead of Stage 4/5) also shipped alongside it. |
 
 ## Contributing
 

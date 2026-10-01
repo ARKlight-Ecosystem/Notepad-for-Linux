@@ -1,24 +1,15 @@
 # include <stdlib.ARKlight>
 
-from pages.about import about
+from components.shell import register_styles
 from pages.home import home
 
 site = Site()
+register_styles(site)
 
 
-# Real @site.page(...) decorators live here, not in pages/*.py --
-# static discovery (arklight.parser.discover) only looks at the entry
-# file's own source, so this is the one place routes must be declared.
-# Each function below just delegates to the actual page-content
-# function in pages/, which is free to import components/ and
-# content/ however it likes.
-
-
+# Stage 1 of docs/implementation/CLASSIC-SHELL-ADDENDUM.md: one route,
+# the classic shell itself. No `/about` -- this isn't a marketing site,
+# it's a single-window desktop app, so there's exactly one page for now.
 @site.page("/")
 def home_page():
     return home()
-
-
-@site.page("/about")
-def about_page():
-    return about()

@@ -9,13 +9,13 @@ client-side behavior, it's expressed through ARKlight's
 
 ## Status
 
-Empty. The first thing to land here is Stage 1 of
+Stage 1 of
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](../../docs/implementation/CLASSIC-SHELL-ADDENDUM.md)
--- the static classic shell (title bar, menu bar, toolbar row, tab
-strip, editor pane, status bar), every value hard-coded, no `State`
-yet. Stages 2 and 3 of that same addendum build directly on top of
-what Stage 1 puts here; Stages 4 and 5 are backend work and belong in
-[`src/backend/`](../backend/README.md) instead.
+is shipped: `arklight build site.py` produces a static, one-route
+classic Notepad++ shell -- title bar, menu bar, toolbar, tab strip,
+editor pane with line-number gutter, status bar -- matching the
+reference screenshot's regions, order, and proportions. Nothing is
+interactive yet; that's Stage 2.
 
 ## What belongs here
 
@@ -26,7 +26,30 @@ what Stage 1 puts here; Stages 4 and 5 are backend work and belong in
 
 ## Layout
 
-No files yet, so no layout to describe. Whether this ends up as a
-single `Site` with one `Page` per view, a `components/` folder for
-shared chrome, or something else is a call to make once Stage 1
-actually starts -- not something this README is pre-deciding.
+- `site.py` -- the one route (`/`) this app has.
+- `pages/home.py` -- composes the shell into a `Page`.
+- `components/shell.py` -- the shell itself: `title_bar`, `menu_bar`,
+  `toolbar`, `tab_strip`, `editor_area`, `status_bar`, plus
+  `register_styles(site)`, which must run once before any page using
+  these is built (see `site.py`).
+- `content/site_content.py` -- every hard-coded value the shell
+  currently renders (menu labels, toolbar groups, status segments,
+  tab list), named and commented so later stages know exactly what
+  they're replacing with real state.
+- `tests/test_site.py` -- build smoke tests: every route builds, the
+  eight shell regions appear in the reference screenshot's order, and
+  all thirteen menu labels are present and correctly ordered.
+- `ARK/` -- build output (`arklight build site.py`), gitignored, not
+  committed.
+
+## Building it
+
+```sh
+cd src/frontend
+ARKLIGHT_ACCEPT_LICENSE=1 arklight build site.py --no-open
+```
+
+(`ARKLIGHT_ACCEPT_LICENSE=1` is only needed non-interactively, e.g. in
+CI -- an interactive `arklight build` asks once and remembers.) See
+[`src/backend/README.md`](../backend/README.md) for how this build
+output actually gets opened as a window right now.

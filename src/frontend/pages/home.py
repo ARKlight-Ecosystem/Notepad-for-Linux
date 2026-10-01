@@ -1,17 +1,21 @@
 # include <stdlib.ARKlight>
 
-from components.footer import footer
-from components.nav import NavBar
-from content.site_content import DESCRIPTION, FAVICON, TAGLINE, TITLE
+from components.shell import editor_area, menu_bar, status_bar, tab_strip, title_bar, toolbar
+from content.site_content import APP_TITLE, FAVICON, PAGE_DESCRIPTION, PAGE_TITLE
 
 
 def home():
     return Page(
-        NavBar(active="home"),
-        Heading(TITLE),
-        Text(TAGLINE, class_name="muted"),
-        footer(),
-        title=TITLE,
-        description=DESCRIPTION,
+        Container(
+            title_bar(APP_TITLE),
+            menu_bar(),
+            toolbar(),
+            tab_strip(),
+            editor_area(),
+            status_bar(),
+            class_name="np-window",
+        ),
+        title=PAGE_TITLE,
+        description=PAGE_DESCRIPTION,
         favicon=FAVICON,
     )
