@@ -10,6 +10,15 @@ what was rejected, why -- see [`PROGRESS.md`](PROGRESS.md).
 
 ## [Unreleased]
 
+Docs correction: earlier docs claimed ARKlight has no way to run
+hand-written JavaScript and that live Ln/Col/Pos and Escape-to-close
+were "blocked on ARKlight". ARKlight's documented script-extension
+hatch makes both reachable; they stay deferred as a project-policy
+choice. Updated `CLASSIC-SHELL-ADDENDUM.md`, `DESIGN-NOTES.md` (new
+"Correction" section), `ARCHITECTURE.md`, `PROGRESS.md`, this file,
+`src/frontend/README.md`, and one code comment and one test docstring
+in `src/frontend/`. No behavior change.
+
 Docs pass: added this file, `PROGRESS.md`,
 [`docs/foundational/ARCHITECTURE.md`](docs/foundational/ARCHITECTURE.md),
 and
@@ -30,9 +39,10 @@ Stage 3 of 5.
 - Editor/status bar: the textarea is two-way bound to
   `State("editor_text")`; `length` and `lines` are live
   (`Computed` via `Derive.string_length` / `Derive.split_count`).
-- Not built: live Ln/Col/Pos and selection length -- ARKlight has no
-  caret/selection primitive. They stay hard-coded; the addendum is
-  amended and the gap tracked, not faked.
+- Not built: live Ln/Col/Pos and selection length -- the closed
+  vocabulary has no caret/selection primitive. They stay hard-coded;
+  the addendum is amended and the gap tracked, not faked. (See the
+  Unreleased note: a script extension could supply this.)
 - `tests/test_site.py`: five new tests (toolbar/menu agreement, the
   other icons staying inert, tab close notice, editor binding + live
   fields, caret/file-dependent fields staying hard-coded). 13/13 pass.

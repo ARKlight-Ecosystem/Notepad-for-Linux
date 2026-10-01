@@ -20,8 +20,9 @@ shortcut hints), clickable new/open/save toolbar icons that agree
 with the menu, a tab close that shows a placeholder notice, and live
 `length`/`lines` status fields driven by the editor text. The other
 twelve menu-bar labels are still inert; that's a future addendum each.
-Ln/Col/Pos stay hard-coded -- ARKlight can't read the caret yet (see
-the addendum's Stage 3 amendment).
+Ln/Col/Pos stay hard-coded -- ARKlight's closed vocabulary can't read
+the caret, and this project hasn't adopted its script-extension hatch
+(see the addendum's Stage 3 amendment).
 
 ## What belongs here
 

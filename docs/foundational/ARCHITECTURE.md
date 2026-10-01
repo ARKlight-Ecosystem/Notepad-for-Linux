@@ -84,13 +84,18 @@ not assumed:
   `bind_value=Bind.model(...)` (two-way textarea binding) and
   `Computed(...)`/`Derive.*` (values derived from state, e.g. the
   status bar's length and line count).
-- **What it doesn't have (yet):** any keydown/key-press primitive,
-  and any way to read the caret or selection (so no live Ln/Col/Pos --
+- **What its closed vocabulary doesn't have (yet):** any
+  keydown/key-press primitive, and any way to read the caret or
+  selection (so no live Ln/Col/Pos --
   see [`DESIGN-NOTES.md`](DESIGN-NOTES.md#why-lncolpos-stay-hard-coded-in-stage-3)).
   `on_click` and input-value binding are the only events ARKlight's
   closed vocabulary reaches right now -- see
   [`DESIGN-NOTES.md`](DESIGN-NOTES.md#why-escape-to-close-is-deferred-not-faked)
-  for what that blocked in Stage 2, and no children-slot for
+  for what that blocked in Stage 2. Both are reachable through
+  ARKlight's documented script-extension hatch, which this project has
+  chosen not to use (see
+  [`DESIGN-NOTES.md`](DESIGN-NOTES.md#correction-arklight-does-have-an-escape-hatch)).
+  The vocabulary also has no children-slot for
   user-defined components (content goes through declared props
   instead) -- relevant if a `Menu`/`MenuItem` component ever gets
   factored out of `components/shell.py`'s current plain-function

@@ -166,7 +166,7 @@ def test_editor_is_two_way_bound_and_status_fields_are_live(built):
 
 
 def test_fields_that_need_a_caret_or_a_file_stay_hard_coded(built):
-    """Ln/Col/Pos need caret offsets ARKlight can't expose; encoding/EOL
+    """Ln/Col/Pos need caret offsets the closed vocabulary can't expose; encoding/EOL
     need a real file. None of them may be bound to anything."""
     html = (built / "index.html").read_text(encoding="utf-8")
     for text in ("Normal text file", "Ln : 1", "Col : 1", "Pos : 1",

@@ -21,13 +21,29 @@ Status of each rung on the one implementation ladder accepted so far
 | 1 of 5 | Static classic shell (title bar, menu bar, toolbar, tab strip, editor pane, status bar) | DONE |
 | -- amendment | Flask + pywebview interim native window, pulled forward from Stage 5 | DONE |
 | 2 of 5 | File menu opens/closes, click-outside-closes | DONE |
-| -- (deferred) | Escape-key-closes -- no keydown primitive in ARKlight yet | BLOCKED (upstream) |
+| -- (deferred) | Escape-key-closes -- no keydown primitive in the closed vocabulary; reachable via a script extension, which the project hasn't adopted | DEFERRED (policy) |
 | 3 of 5 | Toolbar/tabs/status bar come alive (frontend-computable fields) | DONE |
-| -- (deferred) | Live Ln/Col/Pos + selection length -- no caret/selection primitive in ARKlight yet | BLOCKED (upstream) |
+| -- (deferred) | Live Ln/Col/Pos + selection length -- no caret/selection primitive in the closed vocabulary; reachable via a script extension, which the project hasn't adopted | DEFERRED (policy) |
 | 4 of 5 | Flask File-menu endpoints (New/Open/Save/Save As/Exit) | PLANNED |
 | 5 of 5 | Serve it as one app; retire or formalize the pywebview amendment | PLANNED |
 
 ## Detail
+
+### Docs correction -- ARKlight does have an escape hatch
+
+The Stage 2 and Stage 3 write-ups said ARKlight has no way to run
+hand-written JavaScript, so Escape and live Ln/Col/Pos were "blocked
+upstream". That was wrong. ARKlight's `EXPERIMENTAL-APIS.md`
+documents several hatches, the main one being `ScriptExtension`
+(`site.register_script_extension`). A throwaway ~30-line prototype,
+driven in jsdom with the real `arklight.js`, got Ln/Col/Pos,
+selection length and Escape-to-close working. Nothing in the app
+changed; the gaps are now recorded as deferred by this project's
+"no hand-written JavaScript" policy, with the prototype's caveats
+(unvalidated JS, reliance on undocumented input delegation, a
+sync-write bug) written up in `DESIGN-NOTES.md`. Open decision for
+the maintainer: adopt the bridge as a "Stage 3b", or keep the
+status bar's caret fields static.
 
 ### Stage 3 -- Toolbar, tabs and status bar come alive
 
@@ -47,10 +63,10 @@ stage's scope.
 - **Status bar:** the textarea is two-way bound to
   `State("editor_text")`; `length` and `lines` are `Computed`s of it.
   **Ln/Col/Pos and selection length were not built.** The addendum
-  lumped them in with the computable fields, but ARKlight exposes no
-  caret/selection offsets and no focus/select/key event to read them
-  from -- the same missing event surface that deferred Escape in
-  Stage 2. Faking them (e.g. caret-at-end-of-text) would be correct
+  lumped them in with the computable fields, but ARKlight's closed
+  vocabulary exposes no caret/selection offsets and no
+  focus/select/key event to read them from -- the same missing event
+  surface that deferred Escape in Stage 2. Faking them (e.g. caret-at-end-of-text) would be correct
   while typing and wrong after a click elsewhere, so they stay
   hard-coded and the addendum was amended to say so.
 
@@ -82,8 +98,9 @@ message (full write-ups in `docs/foundational/DESIGN-NOTES.md`):
   closed vocabulary turned up no keydown/key-press primitive at all
   -- `Action.*` only fires from `on_click`. Rather than reach for
   something that only looks like it works, the addendum itself got
-  amended: click-outside shipped, Escape is tracked as a gap blocked
-  on ARKlight growing a keyboard-event primitive.
+  amended: click-outside shipped, Escape is tracked as a deferred
+  gap. (Originally recorded as "blocked on ARKlight growing a
+  keyboard-event primitive"; corrected below.)
 - **Every File-menu item closes the dropdown on click, but does
   nothing else.** The addendum allowed either a plain no-op or a
   placeholder "not wired yet" acknowledgement. `on_click` only

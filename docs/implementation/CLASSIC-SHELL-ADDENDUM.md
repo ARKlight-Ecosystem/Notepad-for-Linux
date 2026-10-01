@@ -141,9 +141,13 @@ vocabulary and nothing else.
   `Show`-gated by the same `file_menu_open` state, stacked under the
   menu bar via plain `z-index` so a click back on "File" still reaches
   File's own handler) and is what actually shipped. Escape-to-close
-  waits for ARKlight to grow a keyboard-event primitive -- tracked as
-  a gap, not silently dropped or faked with something that only looks
-  like it works.
+  is deferred -- tracked as a gap, not silently dropped or faked with
+  something that only looks like it works. *Correction:* the closed
+  vocabulary has no keyboard-event primitive, but ARKlight's
+  documented script-extension hatch could supply one; the deferral is
+  a project-policy choice ("no hand-written JavaScript"), not an
+  impossibility. See `DESIGN-NOTES.md`, "Correction: ARKlight does
+  have an escape hatch".
 - **Where it lives:** `components/shell.py`'s `file_dropdown()` and
   the rewritten `menu_bar()`; `content/site_content.py`'s
   `FILE_MENU_ITEMS` (labels, order, grouping, shortcut hints --
@@ -183,15 +187,21 @@ is the thing that genuinely needs a backend: actual file I/O.
   selection length" as client-side computable. A closer read of
   ARKlight's vocabulary says otherwise: `Textarea` can be two-way
   bound to `State` (`bind_value=Bind.model(...)`), which is enough
-  to derive *document* length and line count, but nothing exposes the
-  caret or selection offsets (`selectionStart`/`selectionEnd`), and
-  there is no focus/select/keyup event to hang a handler off of --
-  the same missing-event-surface that deferred Escape in Stage 2.
+  to derive *document* length and line count, but nothing in the
+  closed vocabulary exposes the caret or selection offsets
+  (`selectionStart`/`selectionEnd`), and it has no focus/select/keyup
+  event to hang a handler off of -- the same missing event surface
+  that deferred Escape in Stage 2.
   Ln, Col, Pos and selection length therefore stay hard-coded (`Ln :
   1`, `Col : 1`, `Pos : 1`) rather than being approximated -- e.g.
   assuming the caret sits at the end of the text would be right while
   typing and wrong the moment someone clicks elsewhere. Tracked as a
-  gap blocked on ARKlight growing a caret/selection primitive.
+  gap, deferred by project policy. *Correction:* this was originally
+  written as "blocked on ARKlight growing a caret/selection
+  primitive". That was inaccurate: a `ScriptExtension` can bridge
+  caret and selection facts into `State` today (prototyped, not
+  committed), at the cost of hand-written, unvalidated JavaScript.
+  See `DESIGN-NOTES.md`.
   `length` and `lines` *did* ship live.
 - **What shipped:**
   - Toolbar: new, open and save are clickable and fire the same

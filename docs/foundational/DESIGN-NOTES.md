@@ -62,13 +62,15 @@ written before a close read of ARKlight's actual vocabulary. Checking
 `arklight/api.py` and the authoring docs directly turned up no
 keydown/key-press primitive anywhere in ARKlight -- `on_click` is the
 only event its closed vocabulary currently reaches. There is no
-`on_keydown=`, no global listener mechanism, and no documented escape
-hatch for one (ARKlight deliberately has none for arbitrary JS at
-all, for reasons unrelated to this specific gap). Building a
-real Escape handler isn't possible without either ARKlight growing a
-keyboard-event primitive, or reaching for a raw-JS escape hatch that
-doesn't exist and wouldn't fit this project's "no hand-written
-JavaScript" stance anyway.
+`on_keydown=` and no global listener primitive in the closed
+vocabulary. (*Correction, see below: this paragraph originally also
+said ARKlight has no escape hatch for arbitrary JS. That was wrong --
+it has documented, deliberately noisy ones. The deferral stands, but
+the reason is this project's "no hand-written JavaScript" stance, not
+an impossibility.*) A real Escape handler is therefore not buildable
+in the validated vocabulary; it needs either ARKlight growing a
+keyboard-event primitive, or a script extension (see the correction
+section), which this project has chosen not to use so far.
 
 **Why not skip it silently instead:** a gap that isn't written down
 tends to get rediscovered the hard way, usually while someone's
@@ -88,9 +90,11 @@ own `on_click` instead of the backdrop underneath it. No JavaScript
 written by hand, no escape hatch -- just existing `style={...}`
 properties arranged correctly.
 
-**Status:** tracked gap. Revisit if/when ARKlight ships a keydown
-primitive; not blocking any currently-planned stage, since nothing
-else in the addendum needs keyboard events.
+**Status:** deferred by project policy. Revisit if ARKlight ships a
+keydown primitive, or if the project decides to accept a script
+extension (see "Correction: ARKlight does have an escape hatch"
+below). Not blocking any currently-planned stage, since nothing else
+in the addendum needs keyboard events.
 
 ## Why every File-menu item closes the dropdown, with nothing else wired
 
@@ -139,9 +143,11 @@ ARKlight's vocabulary shows the split is different. `Textarea` takes
 anything that is a function of the text -- character count
 (`Derive.string_length`), line count (`Derive.split_count` on `"\n"`)
 -- is a `Computed`. But the caret and selection offsets are DOM
-properties no primitive reads, and there is no focus/select/keyup
-event to trigger a read, so no `Computed` can see them (the same
-absence of an event surface that deferred Escape in Stage 2).
+properties no built-in primitive reads, and the closed vocabulary has
+no focus/select/keyup event to trigger a read, so no `Computed` can
+see them (the same absence of an event surface that deferred Escape in
+Stage 2). "No built-in primitive" is not "no way": see the
+correction section below.
 
 **Why not approximate:** the tempting shortcut is to treat the caret as
 sitting at the end of the text, deriving Ln/Col/Pos from the last line.
@@ -151,8 +157,74 @@ worse than one that is plainly static, because nobody can tell which
 state it is in. Same principle as Escape-to-close: do the part that is
 real, write down the part that isn't.
 
-**Status:** tracked gap, blocked on ARKlight growing a caret/selection
-primitive. Not blocking Stage 4.
+**Status:** deferred by project policy, not blocked. Reachable today
+through a script extension (see the correction section below); would
+also be solved by ARKlight growing a caret/selection primitive. Not
+blocking Stage 4.
+
+## Correction: ARKlight does have an escape hatch
+
+**What was wrong:** earlier versions of these notes (and of the
+addendum's Stage 3 amendment, `PROGRESS.md`, `CHANGELOG.md` and
+`ARCHITECTURE.md`) said ARKlight has no way to run hand-written
+JavaScript, and that the caret/Escape gaps were "blocked on ARKlight
+growing a primitive". Both were stated without reading
+`EXPERIMENTAL-APIS.md`, which documents the hatches. The Site method
+list showed `raw_postprocess` and `register_script_extension`; they
+were skipped, not evaluated.
+
+**What actually exists** (per ARKlight's `EXPERIMENTAL-APIS.md`;
+re-read it before relying on this, the API is marked experimental):
+
+- `ScriptExtension`, registered with `site.register_script_extension`.
+  A Python subclass whose script body is appended to `arklight.js`.
+  It adds behavior only: markup and styling stay inside the validated
+  vocabulary, and it works under the strict CSP.
+- `Page(scripts=[...])` together with `trusted_script_origins`, for
+  loading a vendor SDK.
+- A custom `Backend` subclass that rewrites build output.
+- CSS-import and `@media` escapes.
+- `raw_postprocess` is deprecated and now does nothing.
+
+Every hatch prints a loud banner on each build, is recorded in
+`sbom.txt`, and counts toward a nudge (at 3 uses) suggesting an
+upstream PR instead.
+
+**What was tested (throwaway prototype, not in this repo):** a roughly
+30-line `ScriptExtension` pushed caret and selection facts into `State`
+through hidden bound inputs, driven in jsdom with the real
+`arklight.js`. Ln, Col, Pos and selection length tracked the caret
+(offset 4 in `ab\ncde\nf` gave Ln 2 / Col 2 / Pos 5; selecting 3..7
+gave Ln 2 / Col 1 / Pos 4 / sel 4), typed text stayed intact, and
+Escape closed the File menu while other keys did not. Not tested:
+a real browser, and loading an editor library such as CodeMirror via
+`scripts` + `trusted_script_origins`.
+
+**Caveats a future implementer should know:**
+
+- The extension's JS is the one part the build does not validate. A
+  typo in a state name fails silently, which is the opposite of the
+  closed vocabulary's main benefit.
+- The prototype relied on the runtime's delegated `input` listener
+  noticing writes to hidden bound inputs. That is not a documented
+  contract and could change between ARKlight versions.
+- The runtime is an IIFE, so an extension cannot touch the store
+  directly; it has to go through the DOM.
+- A handler that writes to a bound input *synchronously* can wipe the
+  editor, because the re-render overwrites the textarea from stale
+  state. Deferring the write (`setTimeout`) fixed it.
+- The documented `#include <expapilib.ARKlight>` marker breaks the
+  build if placed in the preamble; it must follow the first real
+  statement.
+- `Input(hidden=True)` compiles to an unhelpful `data-hidden`;
+  `style={"display": "none"}` was used instead.
+
+**Decision (unchanged):** nothing in the code changes. Live
+Ln/Col/Pos and Escape-to-close stay deferred, now recorded accurately
+as a project-policy choice ("no hand-written JavaScript") and not as
+an ARKlight limitation. If the project decides the trade is worth it,
+the bridge would be its own stage (provisionally "Stage 3b"), and it
+would be the first hatch use for the purposes of the nudge counter.
 
 ## Why closing the only tab shows a notice instead of resetting
 

@@ -99,9 +99,11 @@ CLOSE_TAB_NOTICE = "Closing the last tab isn't wired up yet \u2014 there is no r
 # page in `pages/home.py`, derived from the editor's text.
 #
 # Only length and lines are live. Ln/Col/Pos (and selection length)
-# need the caret/selection offsets, and ARKlight has no primitive that
-# exposes them -- tracked as a gap in the addendum's Stage 3 amendment,
-# not faked (e.g. by assuming the caret is at the end of the text).
+# need the caret/selection offsets, and ARKlight's closed vocabulary has
+# no primitive that exposes them (a script extension could, but this
+# project doesn't use one) -- tracked as a gap in the addendum's Stage 3
+# amendment, not faked (e.g. by assuming the caret is at the end of the
+# text).
 # Encoding, EOL style and file type need a real file: Stage 4/5.
 STATUS_SEGMENTS = [
     "Normal text file",
