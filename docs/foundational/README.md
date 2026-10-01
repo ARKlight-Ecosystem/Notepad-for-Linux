@@ -23,13 +23,16 @@ alongside a Flask backend.
 
 ## Index
 
-Nothing has landed here yet -- this project is still at the
-scaffolding stage. The first entries are expected to cover:
+| File | Covers |
+| --- | --- |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | How the ARKlight-compiled frontend and the Flask backend fit together, what each owns, the pywebview interim-native-window amendment, where hard-coded content lives, and the testing strategy. |
+| [`DESIGN-NOTES.md`](DESIGN-NOTES.md) | Per-decision design records: why pywebview, why the OS title bar stays on for now, why Escape-to-close is deferred rather than faked, why File-menu items close the dropdown with nothing else wired. |
+
+Still planned, not yet written:
 
 | Planned file | Will cover |
 | --- | --- |
-| `ARCHITECTURE.md` | How the ARKlight-compiled frontend and the Flask backend fit together: what ARKlight owns (the editor UI, compiled to static HTML/CSS/JS), what Flask owns (file I/O, search, anything needing a live process), and how the two talk to each other. |
 | `GETTING-STARTED.md` | Install and local dev workflow for both halves of the stack. |
 
-Add a row here -- with a real link -- as soon as a file actually
-exists. Until then, treat the table above as a plan, not an index.
+Add a row to the Index table above -- with a real link -- as soon as
+a planned file actually exists.
