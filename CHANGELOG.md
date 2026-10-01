@@ -16,6 +16,27 @@ and
 [`docs/foundational/DESIGN-NOTES.md`](docs/foundational/DESIGN-NOTES.md).
 No code change.
 
+## Stage 3 -- Toolbar, tabs and status bar come alive
+
+[`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](docs/implementation/CLASSIC-SHELL-ADDENDUM.md),
+Stage 3 of 5.
+
+- Toolbar: new/open/save icons are clickable and fire the same
+  placeholder handler as their File-menu rows
+  (`file_placeholder_action()`); every icon gains a pressed state; the
+  other eleven icons stay inert.
+- Tab strip: the only tab's close (x) opens a dismissible
+  placeholder notice instead of doing anything destructive.
+- Editor/status bar: the textarea is two-way bound to
+  `State("editor_text")`; `length` and `lines` are live
+  (`Computed` via `Derive.string_length` / `Derive.split_count`).
+- Not built: live Ln/Col/Pos and selection length -- ARKlight has no
+  caret/selection primitive. They stay hard-coded; the addendum is
+  amended and the gap tracked, not faked.
+- `tests/test_site.py`: five new tests (toolbar/menu agreement, the
+  other icons staying inert, tab close notice, editor binding + live
+  fields, caret/file-dependent fields staying hard-coded). 13/13 pass.
+
 ## Stage 2 -- File menu opens and closes
 
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](docs/implementation/CLASSIC-SHELL-ADDENDUM.md),

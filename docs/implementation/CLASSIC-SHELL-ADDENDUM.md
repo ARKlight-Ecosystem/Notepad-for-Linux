@@ -1,6 +1,6 @@
 # Classic Shell Addendum: Staged Order
 
-**Status:** Accepted. Stage 1 and 2 of 5 SHIPPED. This is the first
+**Status:** Accepted. Stage 1, 2 and 3 of 5 SHIPPED. This is the first
 segment of the larger "divide the app into segments, ship one at a
 time" plan -- everything else on that list (Edit menu, Search menu,
 the actual editing engine, tabs-with-real-documents, and so on) is
@@ -156,7 +156,7 @@ vocabulary and nothing else.
   order; Recent Files has no click behavior (no real submenu this
   stage); the backdrop closes the menu via the same state key.
 
-## Stage 3 of 5 -- Toolbar, tabs, and status bar come alive (frontend only)
+## Stage 3 of 5 -- Toolbar, tabs, and status bar come alive (frontend only) -- SHIPPED
 
 Rounds out the shell's remaining interactive-but-backend-free
 surface, so that by the end of this stage the only thing not working
@@ -178,6 +178,48 @@ is the thing that genuinely needs a backend: actual file I/O.
   else) stay hard-coded until Stage 4/5.
 - **Done when:** every piece of chrome in the reference screenshot
   that *can* be genuinely interactive without a backend, is.
+- **Amendment -- caret-dependent status fields are deferred, not
+  faked:** the status-bar bullet above named "line/column position,
+  selection length" as client-side computable. A closer read of
+  ARKlight's vocabulary says otherwise: `Textarea` can be two-way
+  bound to `State` (`bind_value=Bind.model(...)`), which is enough
+  to derive *document* length and line count, but nothing exposes the
+  caret or selection offsets (`selectionStart`/`selectionEnd`), and
+  there is no focus/select/keyup event to hang a handler off of --
+  the same missing-event-surface that deferred Escape in Stage 2.
+  Ln, Col, Pos and selection length therefore stay hard-coded (`Ln :
+  1`, `Col : 1`, `Pos : 1`) rather than being approximated -- e.g.
+  assuming the caret sits at the end of the text would be right while
+  typing and wrong the moment someone clicks elsewhere. Tracked as a
+  gap blocked on ARKlight growing a caret/selection primitive.
+  `length` and `lines` *did* ship live.
+- **What shipped:**
+  - Toolbar: new, open and save are clickable and fire the same
+    placeholder handler as their File-menu rows (one shared
+    function, `file_placeholder_action()`, so Stage 4 swaps it in one
+    place). Every toolbar icon gets a pressed (`:active`) state on top
+    of Stage 1's hover; only the three live icons get a pointer
+    cursor. The other eleven stay inert (Edit/Search/View/... are
+    out of scope; `save-all`, `close` and `print` are File actions
+    but the stage only names new/open/save).
+  - Tab strip: the single "new 1" tab's close (x) opens a small
+    dismissible notice ("Closing the last tab isn't wired up yet")
+    rather than doing anything. Silently resetting the editor would
+    have discarded typed text with none of Notepad++'s save prompt,
+    so the placeholder-prompt option was taken over the no-op one.
+  - Editor + status bar: the textarea is bound to
+    `State("editor_text")`; `length` and `lines` are
+    `Computed(...)` values (`Derive.string_length`,
+    `Derive.split_count`) rendered through `Bind(...)`. Encoding, EOL
+    style and "Normal text file" stay hard-coded until Stage 4/5.
+- **Where it lives:** `components/shell.py` (`file_placeholder_action`,
+  `_toolbar_icon`, `tab_strip`, `status_bar`), `content/site_content.py`
+  (`TOOLBAR_FILE_ACTIONS`, `CLOSE_TAB_NOTICE`, the dict-shaped live
+  entries in `STATUS_SEGMENTS`), `pages/home.py` (the two new
+  `State`s and two `Computed`s). Five new tests in
+  `tests/test_site.py`; the page was additionally exercised in jsdom
+  (typing, tab close, toolbar vs. menu) -- not committed, see
+  `PROGRESS.md`.
 
 ## Stage 4 of 5 -- Flask comes in, File-menu endpoints only (backend)
 

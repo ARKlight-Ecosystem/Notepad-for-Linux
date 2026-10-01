@@ -10,13 +10,14 @@ feature reference -- not something this project builds or ships.
 
 ## Status
 
-Stage 1 of the classic shell is shipped -- see
+Stages 1-3 of the classic shell are shipped -- see
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](docs/implementation/CLASSIC-SHELL-ADDENDUM.md).
-`src/frontend/` builds a static, pixel-checked match for the classic
-Notepad++ window chrome; `src/backend/` serves it in a real native
-window via Flask + pywebview, an interim stand-in for ARKlight's own
-desktop backend (not on `main` yet). Nothing is interactive or reads/
-writes a real file yet -- that's Stages 2 onward. See
+`src/frontend/` builds a pixel-checked match for the classic
+Notepad++ window chrome with a working File dropdown, clickable
+new/open/save toolbar icons, and live length/line-count status fields;
+`src/backend/` serves it in a real native window via Flask + pywebview,
+an interim stand-in for ARKlight's own desktop backend (not on `main`
+yet). Nothing reads or writes a real file yet -- that's Stage 4. See
 [`docs/README.md`](docs/README.md) for where things live and why.
 
 ## Stack

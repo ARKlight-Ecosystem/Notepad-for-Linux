@@ -1,12 +1,12 @@
 # include <stdlib.ARKlight>
 
-"""The classic Notepad++ window chrome -- Stage 1 (static shell) and
-Stage 2 (File menu opens/closes) of
-docs/implementation/CLASSIC-SHELL-ADDENDUM.md. Everything except
-`menu_bar()`'s File item and its dropdown is still exactly Stage 1:
-hard-coded, no `State`, no `on_click`. File is the one piece of
-interactivity this file carries, and deliberately the only one --
-every other menu-bar label stays a plain, inert `Span`.
+"""The classic Notepad++ window chrome -- Stage 1 (static shell),
+Stage 2 (File menu opens/closes) and Stage 3 (toolbar, tab and status
+bar come alive) of docs/implementation/CLASSIC-SHELL-ADDENDUM.md.
+Interactivity here is limited to File's menu-bar item and dropdown,
+the new/open/save toolbar icons, the tab's close button, and the two
+live status-bar fields. Every other menu-bar label and toolbar icon
+stays a plain, inert `Span`.
 
 `register_styles(site)` must be called once, before any page that
 uses these components is built (see site.py) -- it's where every
@@ -14,11 +14,13 @@ uses these components is built (see site.py) -- it's where every
 """
 
 from content.site_content import (
+    CLOSE_TAB_NOTICE,
     FILE_MENU_ITEMS,
     GUTTER_LINE_COUNT,
     MENU_LABELS,
     STATUS_SEGMENTS,
     TABS,
+    TOOLBAR_FILE_ACTIONS,
     TOOLBAR_GROUPS,
 )
 
@@ -172,6 +174,13 @@ def register_styles(site):
         "border": "1px solid #c3c3c3",
         ":hover:background": "#cce4f7",
         ":hover:border-color": "#99ccee",
+        ":active:background": "#99c9ef",
+        ":active:border-color": "#5fa8dd",
+    })
+    # Stage 3: the new/open/save icons actually do something, so only
+    # they get the pointer cursor -- the inert ones keep the default.
+    site.style("np-toolbar-icon-live", {
+        "cursor": "pointer",
     })
     site.style("np-toolbar-divider", {
         "width": "1px",
@@ -190,6 +199,7 @@ def register_styles(site):
         "border-bottom": "1px solid #d9d9d9",
         "padding-left": "4px",
         "gap": "2px",
+        "position": "relative",
     })
     site.style("np-tab", {
         "display": "flex",
@@ -212,8 +222,34 @@ def register_styles(site):
         "text-align": "center",
         "line-height": "14px",
         "border-radius": "2px",
+        "cursor": "pointer",
         ":hover:background": "#d0453c",
         ":hover:color": "#ffffff",
+        ":active:background": "#a8322b",
+    })
+    # Stage 3: placeholder notice shown when the only tab's close is
+    # clicked. Hangs off the tab strip, above the editor, below menus.
+    site.style("np-tab-notice", {
+        "position": "absolute",
+        "top": "100%",
+        "left": "4px",
+        "z-index": "15",
+        "display": "flex",
+        "align-items": "center",
+        "gap": "12px",
+        "padding": "6px 10px",
+        "background": "#fffbe6",
+        "border": "1px solid #e0cf7a",
+        "box-shadow": "2px 2px 6px rgba(0, 0, 0, 0.18)",
+        "white-space": "nowrap",
+    })
+    site.style("np-tab-notice-ok", {
+        "padding": "1px 12px",
+        "border": "1px solid #b0b0b0",
+        "background": "#f3f3f3",
+        "cursor": "pointer",
+        ":hover:background": "#cce4f7",
+        ":active:background": "#99c9ef",
     })
 
     # -- Editor body: gutter + pane ----------------------------------------
@@ -292,6 +328,17 @@ def title_bar(title):
     )
 
 
+def file_placeholder_action():
+    """The one placeholder click handler every File-menu action shares.
+
+    Stage 2 gave each File-menu row "close the dropdown, do nothing
+    else" until Stage 4 wires real behavior. Stage 3's toolbar icons
+    for new/open/save call this same function, so the menu and the
+    toolbar can't drift apart -- Stage 4 replaces it in one place.
+    """
+    return Action.set("file_menu_open", False)
+
+
 def file_dropdown():
     rows = []
     for item in FILE_MENU_ITEMS:
@@ -315,7 +362,7 @@ def file_dropdown():
                 # clicking an item just closes the dropdown, the same
                 # way a real menu would, without claiming to do the
                 # file operation it's labeled for.
-                on_click=Action.set("file_menu_open", False),
+                on_click=file_placeholder_action(),
             )
         rows.append(row)
     return Container(*rows, class_name="np-file-dropdown")
@@ -343,11 +390,21 @@ def menu_bar():
     return Container(file_item, *other_items, backdrop, class_name="np-menubar")
 
 
+def _toolbar_icon(name):
+    if name in TOOLBAR_FILE_ACTIONS:
+        return Span(
+            class_name="np-toolbar-icon np-toolbar-icon-live",
+            on_click=file_placeholder_action(),
+            **{"data-icon": name},
+        )
+    return Span(class_name="np-toolbar-icon", **{"data-icon": name})
+
+
 def toolbar():
     groups = []
     for group in TOOLBAR_GROUPS:
         groups.append(Container(
-            *[Span(class_name="np-toolbar-icon", **{"data-icon": name}) for name in group],
+            *[_toolbar_icon(name) for name in group],
             class_name="np-toolbar-group",
         ))
     # interleave a divider between groups, none trailing
@@ -365,10 +422,26 @@ def tab_strip():
         classes = "np-tab np-tab-active" if tab["active"] else "np-tab"
         tabs.append(Container(
             Span(tab["label"]),
-            Span("\u00d7", class_name="np-tab-close"),
+            Span(
+                "\u00d7",
+                class_name="np-tab-close",
+                on_click=Action.set("close_tab_notice", True),
+            ),
             class_name=classes,
         ))
-    return Container(*tabs, class_name="np-tabstrip")
+    notice = Show(
+        Predicate.truthy("close_tab_notice"),
+        Container(
+            Span(CLOSE_TAB_NOTICE),
+            Span(
+                "OK",
+                class_name="np-tab-notice-ok",
+                on_click=Action.set("close_tab_notice", False),
+            ),
+            class_name="np-tab-notice",
+        ),
+    )
+    return Container(*tabs, notice, class_name="np-tabstrip")
 
 
 def editor_area():
@@ -378,13 +451,18 @@ def editor_area():
     ]
     return Container(
         Container(*gutter_lines, class_name="np-gutter"),
-        Textarea("", class_name="np-editor"),
+        Textarea("", class_name="np-editor", bind_value=Bind.model("editor_text")),
         class_name="np-body",
     )
 
 
 def status_bar():
-    return Container(
-        *[Span(seg, class_name="np-status-segment") for seg in STATUS_SEGMENTS],
-        class_name="np-statusbar",
-    )
+    segments = []
+    for seg in STATUS_SEGMENTS:
+        if isinstance(seg, dict):
+            # Live field (Stage 3): static label + a Bind to a
+            # Computed declared in pages/home.py.
+            segments.append(Span(seg["prefix"], Bind(seg["computed"]), class_name="np-status-segment"))
+        else:
+            segments.append(Span(seg, class_name="np-status-segment"))
+    return Container(*segments, class_name="np-statusbar")

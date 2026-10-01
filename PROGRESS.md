@@ -22,11 +22,46 @@ Status of each rung on the one implementation ladder accepted so far
 | -- amendment | Flask + pywebview interim native window, pulled forward from Stage 5 | DONE |
 | 2 of 5 | File menu opens/closes, click-outside-closes | DONE |
 | -- (deferred) | Escape-key-closes -- no keydown primitive in ARKlight yet | BLOCKED (upstream) |
-| 3 of 5 | Toolbar/tabs/status bar come alive (frontend-computable fields) | PLANNED |
+| 3 of 5 | Toolbar/tabs/status bar come alive (frontend-computable fields) | DONE |
+| -- (deferred) | Live Ln/Col/Pos + selection length -- no caret/selection primitive in ARKlight yet | BLOCKED (upstream) |
 | 4 of 5 | Flask File-menu endpoints (New/Open/Save/Save As/Exit) | PLANNED |
 | 5 of 5 | Serve it as one app; retire or formalize the pywebview amendment | PLANNED |
 
 ## Detail
+
+### Stage 3 -- Toolbar, tabs and status bar come alive
+
+Three small pieces of interactivity, and one finding that shrank the
+stage's scope.
+
+- **Toolbar:** new/open/save fire the very same function File's
+  dropdown rows do (`file_placeholder_action()` in `shell.py`), so the
+  menu and the toolbar can't disagree and Stage 4 has one place to
+  swap. Pressed (`:active`) styling joins Stage 1's hover on every
+  icon; the eleven non-File-action icons stay inert.
+- **Tab close:** clicking the x on the only tab shows a dismissible
+  "isn't wired up yet" notice. The addendum allowed a no-op or a
+  placeholder prompt; the obvious "real" behavior (reset to an empty
+  `new 1`, as Notepad++ does) would silently throw away typed text
+  with no save prompt, so it was not taken.
+- **Status bar:** the textarea is two-way bound to
+  `State("editor_text")`; `length` and `lines` are `Computed`s of it.
+  **Ln/Col/Pos and selection length were not built.** The addendum
+  lumped them in with the computable fields, but ARKlight exposes no
+  caret/selection offsets and no focus/select/key event to read them
+  from -- the same missing event surface that deferred Escape in
+  Stage 2. Faking them (e.g. caret-at-end-of-text) would be correct
+  while typing and wrong after a click elsewhere, so they stay
+  hard-coded and the addendum was amended to say so.
+
+Verified, not just written: `arklight build site.py` clean, 13/13
+tests pass (5 new) under both `pytest` and `python -m pytest`, and the
+built page was driven in jsdom with ARKlight's real `arklight.js`:
+typing `a\nbb\nccc` gives `length : 8`, `lines : 3`; clearing returns
+to `0`/`1`; the tab x opens the notice and OK dismisses it; toolbar
+New/Save close the File dropdown exactly like the menu rows; Cut does
+nothing. That jsdom script is a throwaway, not committed -- the repo
+still has no headless-browser tooling.
 
 ### Stage 2 -- File menu opens and closes
 
@@ -102,5 +137,7 @@ kept around, since none of them fit a single-window desktop app.
 
 ## Next up
 
-Stage 3 (toolbar/tabs/status bar interactivity) is next in the
-addendum's own order. No work has started on it yet.
+Stage 4 (Flask File-menu endpoints: New/Open/Save/Save As/Exit) is
+next in the addendum's own order. No work has started on it yet. It
+replaces `file_placeholder_action()` and the tab-close notice with
+real behavior.

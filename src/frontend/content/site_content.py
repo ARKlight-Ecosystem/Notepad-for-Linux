@@ -1,8 +1,10 @@
-"""Hard-coded classic-shell content -- Stage 1 of
-docs/implementation/CLASSIC-SHELL-ADDENDUM.md. Nothing here is dynamic
-yet: no `State`, no real filename, no real document. Every value is a
-plausible default, the same way the reference screenshot's own
-Notepad++ window would look with a single untitled, unmodified tab.
+"""Classic-shell content -- Stage 1 (hard-coded values) and Stage 3
+(which of them stay hard-coded) of
+docs/implementation/CLASSIC-SHELL-ADDENDUM.md. Still no real filename
+and no real document: every value is a plausible default, the same
+way the reference screenshot's own Notepad++ window would look with a
+single untitled, unmodified tab. Stage 3 replaced exactly two status-
+bar values (length, lines) with live ones -- see `STATUS_SEGMENTS`.
 """
 
 APP_TITLE = "new 1 - Notepad++"
@@ -58,6 +60,15 @@ FILE_MENU_ITEMS = [
     {"label": "Exit", "shortcut": "Alt+F4"},
 ]
 
+# Toolbar icons that map to a File-menu action and are therefore
+# clickable as of Stage 3. They fire the same placeholder handler the
+# matching File-menu rows do (`shell.file_placeholder_action()`), so
+# the toolbar and the menu can't disagree. Every other icon belongs to
+# a menu (Edit, Search, View, ...) that is still out of scope, so it
+# stays inert -- `save-all`, `close` and `print` are File-menu actions
+# too, but the addendum only names new/open/save for this stage.
+TOOLBAR_FILE_ACTIONS = {"new", "open", "save"}
+
 # Toolbar icon strip, left to right, grouped the way the reference
 # screenshot groups them (a gap marks a divider). Stage 1 draws these
 # as plain static placeholders -- real icon artwork is a later pass,
@@ -73,18 +84,29 @@ TOOLBAR_GROUPS = [
     ["wrap", "all-chars"],
 ]
 
-# Tab strip -- a single hard-coded tab, styled active. Closing it is a
-# Stage 3 concern (and even then, a no-op/placeholder -- see the
-# addendum).
+# Tab strip -- a single hard-coded tab, styled active. Stage 3 gives
+# its close (x) a working click: there is no document lifecycle yet,
+# so closing the only tab shows this placeholder notice instead of
+# doing anything destructive. (Silently resetting the editor would
+# throw away typed text with none of Notepad++'s save prompt.)
 TABS = [{"label": "new 1", "active": True}]
+CLOSE_TAB_NOTICE = "Closing the last tab isn't wired up yet \u2014 there is no real document to close."
 
 # Status bar segments, left to right, same order as the reference
-# screenshot. Values are plausible defaults for an empty, untitled
-# document -- not computed from anything real yet.
+# screenshot. A plain string is a hard-coded default for an empty,
+# untitled document. A dict is Stage 3's live field: `prefix` is the
+# static label and `computed` names a `Computed(...)` declared on the
+# page in `pages/home.py`, derived from the editor's text.
+#
+# Only length and lines are live. Ln/Col/Pos (and selection length)
+# need the caret/selection offsets, and ARKlight has no primitive that
+# exposes them -- tracked as a gap in the addendum's Stage 3 amendment,
+# not faked (e.g. by assuming the caret is at the end of the text).
+# Encoding, EOL style and file type need a real file: Stage 4/5.
 STATUS_SEGMENTS = [
     "Normal text file",
-    "length : 0",
-    "lines : 1",
+    {"prefix": "length : ", "computed": "doc_length"},
+    {"prefix": "lines : ", "computed": "doc_lines"},
     "Ln : 1",
     "Col : 1",
     "Pos : 1",

@@ -1,6 +1,6 @@
 # Architecture
 
-_Current as of Stage 2 of
+_Current as of Stage 3 of
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](../implementation/CLASSIC-SHELL-ADDENDUM.md)
 (the only implementation ladder accepted so far). This file is
 updated in place as more of the addendum ships -- cross-check
@@ -80,10 +80,15 @@ not assumed:
   direct child of `Page(...)`), `Action.toggle_bool`/`Action.set`/etc.
   (a closed vocabulary for `on_click`, one action per click, no
   chaining), `Show(Predicate.*, ...)` (conditional rendering). This
-  is what Stage 2's File dropdown runs on, entirely.
-- **What it doesn't have (yet):** any keydown/key-press primitive.
-  `on_click` is the only event ARKlight's closed vocabulary reaches
-  right now -- see
+  is what Stage 2's File dropdown runs on, entirely. Stage 3 adds
+  `bind_value=Bind.model(...)` (two-way textarea binding) and
+  `Computed(...)`/`Derive.*` (values derived from state, e.g. the
+  status bar's length and line count).
+- **What it doesn't have (yet):** any keydown/key-press primitive,
+  and any way to read the caret or selection (so no live Ln/Col/Pos --
+  see [`DESIGN-NOTES.md`](DESIGN-NOTES.md#why-lncolpos-stay-hard-coded-in-stage-3)).
+  `on_click` and input-value binding are the only events ARKlight's
+  closed vocabulary reaches right now -- see
   [`DESIGN-NOTES.md`](DESIGN-NOTES.md#why-escape-to-close-is-deferred-not-faked)
   for what that blocked in Stage 2, and no children-slot for
   user-defined components (content goes through declared props
@@ -115,7 +120,9 @@ items and their shortcut hints, status bar defaults -- lives in one
 place, `src/frontend/content/site_content.py`, not scattered across
 component code. This is so each later stage (3 replacing status-bar
 hard-codes with computed values, 4 wiring File items to real actions)
-has exactly one file to check for what it's replacing.
+has exactly one file to check for what it's replacing. (Stage 3 did
+that for length/lines: those `STATUS_SEGMENTS` entries are now dicts
+naming a `Computed` instead of strings.)
 
 ## Testing strategy
 

@@ -110,5 +110,71 @@ def test_backdrop_closes_the_menu_and_is_gated_by_the_same_state(built):
     assert '&quot;value&quot;: false' in tag
 
 
+# -- Stage 3: toolbar, tabs, status bar ---------------------------------
+
+
+def _icon_tag(html, name):
+    i = html.index(f'data-icon="{name}"')
+    start = html.rindex("<span", 0, i)
+    return html[start:html.index(">", i)]
+
+
+def test_new_open_save_toolbar_icons_route_to_the_same_handler_as_the_menu(built):
+    """The toolbar and the File menu must agree: each of new/open/save
+    carries exactly the placeholder action every File-menu row does."""
+    html = (built / "index.html").read_text(encoding="utf-8")
+    for name in ("new", "open", "save"):
+        tag = _icon_tag(html, name)
+        assert 'data-ark-on-click="action:set"' in tag, name
+        assert 'data-ark-action-state="file_menu_open"' in tag, name
+        assert "&quot;value&quot;: false" in tag, name
+
+
+def test_other_toolbar_icons_stay_inert(built):
+    html = (built / "index.html").read_text(encoding="utf-8")
+    # Spelled out here on purpose (not imported from content/): the
+    # test should fail if an icon gains behavior the addendum doesn't ask for.
+    inert = ["save-all", "close", "print", "cut", "copy", "paste", "undo",
+             "redo", "find", "find-in-files", "zoom-in", "zoom-out",
+             "wrap", "all-chars"]
+    for name in inert:
+        assert "data-ark-" not in _icon_tag(html, name), f"{name!r} should stay inert in Stage 3"
+
+
+def test_tab_close_opens_a_placeholder_notice_that_can_be_dismissed(built):
+    html = (built / "index.html").read_text(encoding="utf-8")
+    i = html.index("np-tab-close")
+    close_tag = html[html.rindex("<span", 0, i):html.index(">", i)]
+    assert 'data-ark-action-state="close_tab_notice"' in close_tag
+    assert "&quot;value&quot;: true" in close_tag
+    j = html.index("np-tab-notice-ok")
+    ok_tag = html[html.rindex("<span", 0, j):html.index(">", j)]
+    assert 'data-ark-action-state="close_tab_notice"' in ok_tag
+    assert "&quot;value&quot;: false" in ok_tag
+    # The notice itself is Show-gated on the same state key.
+    assert "close_tab_notice" in html[html.rindex("<div", 0, html.index("np-tab-notice\"")):]
+
+
+def test_editor_is_two_way_bound_and_status_fields_are_live(built):
+    html = (built / "index.html").read_text(encoding="utf-8")
+    assert 'data-ark-model="editor_text"' in html
+    assert 'data-ark-bind="doc_length"' in html
+    assert 'data-ark-bind="doc_lines"' in html
+    # Empty-document defaults still render (what a JS-disabled page shows).
+    assert 'length : <span data-ark-bind="doc_length">0</span>' in html
+    assert 'lines : <span data-ark-bind="doc_lines">1</span>' in html
+
+
+def test_fields_that_need_a_caret_or_a_file_stay_hard_coded(built):
+    """Ln/Col/Pos need caret offsets ARKlight can't expose; encoding/EOL
+    need a real file. None of them may be bound to anything."""
+    html = (built / "index.html").read_text(encoding="utf-8")
+    for text in ("Normal text file", "Ln : 1", "Col : 1", "Pos : 1",
+                 "Windows (CR LF)", "UTF-8", "INS"):
+        i = html.index(f">{text}<")
+        tag = html[html.rindex("<span", 0, i):i]
+        assert "data-ark-" not in tag, f"{text!r} should stay hard-coded in Stage 3"
+
+
 def test_assets_are_copied_into_the_build(built):
     assert (built / "assets" / "icon.svg").exists()

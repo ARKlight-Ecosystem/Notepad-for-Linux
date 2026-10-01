@@ -125,3 +125,68 @@ top-level menu labels are handled in both Stage 1 and Stage 2.
 everything else on this list stays exactly this inert until its own
 future addendum, per the addendum's own "Deliberately out of scope"
 section.
+
+## Why Ln/Col/Pos stay hard-coded in Stage 3
+
+**Decision (Stage 3):** ship live `length` and `lines` in the status
+bar; leave Ln, Col, Pos (and selection length) hard-coded and amend the
+addendum, rather than approximate them.
+
+**Why:** the addendum's Stage 3 wording grouped "line/column position,
+selection length" with the fields computable client-side. Reading
+ARKlight's vocabulary shows the split is different. `Textarea` takes
+`bind_value=Bind.model(...)`, so the document's *text* is state, and
+anything that is a function of the text -- character count
+(`Derive.string_length`), line count (`Derive.split_count` on `"\n"`)
+-- is a `Computed`. But the caret and selection offsets are DOM
+properties no primitive reads, and there is no focus/select/keyup
+event to trigger a read, so no `Computed` can see them (the same
+absence of an event surface that deferred Escape in Stage 2).
+
+**Why not approximate:** the tempting shortcut is to treat the caret as
+sitting at the end of the text, deriving Ln/Col/Pos from the last line.
+That is right while typing at the end and wrong as soon as the user
+clicks or arrows elsewhere -- a status bar that is usually right is
+worse than one that is plainly static, because nobody can tell which
+state it is in. Same principle as Escape-to-close: do the part that is
+real, write down the part that isn't.
+
+**Status:** tracked gap, blocked on ARKlight growing a caret/selection
+primitive. Not blocking Stage 4.
+
+## Why closing the only tab shows a notice instead of resetting
+
+**Decision (Stage 3):** the tab's close (x) opens a small dismissible
+"isn't wired up yet" notice. It does not close the tab, and does not
+reset the editor.
+
+**Why:** the addendum allowed "a no-op or a placeholder prompt." A
+real Notepad++ closing its last tab leaves a fresh empty `new 1`, so
+resetting `editor_text` looks like the faithful behavior -- but there is
+no document lifecycle yet, so it would silently discard whatever was
+typed, with none of the save prompt Notepad++ shows. A pure no-op was
+the other option and was passed over because a close button that
+visibly does nothing reads as broken; the notice says why. It is the
+tab-strip analogue of Stage 2's "File items close the menu and do
+nothing else."
+
+**Status:** settled for this stage. Stage 4 replaces it with real close
+behavior alongside real documents.
+
+## Why the toolbar and the File menu share one handler
+
+**Decision (Stage 3):** new/open/save toolbar icons call
+`file_placeholder_action()`, the same function every File-menu row uses,
+instead of each carrying its own `Action.set(...)`.
+
+**Why:** the addendum asks that toolbar and menu "agree with each other
+from day one instead of being wired twice later." One function means
+Stage 4 changes one place, and a test asserts the toolbar icons carry
+exactly the action the menu rows do. Only new/open/save are live: the
+other File actions on the toolbar (`save-all`, `close`, `print`) are not
+named by the addendum for this stage, and everything else belongs to
+menus (Edit, Search, View, ...) that are out of scope, so they stay
+inert and keep the default cursor so nothing signals a click that does
+nothing.
+
+**Status:** settled for this stage.

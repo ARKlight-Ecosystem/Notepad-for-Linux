@@ -9,15 +9,19 @@ client-side behavior, it's expressed through ARKlight's
 
 ## Status
 
-Stages 1 and 2 of
+Stages 1, 2 and 3 of
 [`docs/implementation/CLASSIC-SHELL-ADDENDUM.md`](../../docs/implementation/CLASSIC-SHELL-ADDENDUM.md)
 are shipped: `arklight build site.py` produces a classic Notepad++
 shell -- title bar, menu bar, toolbar, tab strip, editor pane with
 line-number gutter, status bar -- matching the reference screenshot's
 regions, order, and proportions, with a working File dropdown (opens
 on click, closes on an outside click, items in classic order with
-shortcut hints). The other twelve menu-bar labels are still inert;
-that's a future addendum each.
+shortcut hints), clickable new/open/save toolbar icons that agree
+with the menu, a tab close that shows a placeholder notice, and live
+`length`/`lines` status fields driven by the editor text. The other
+twelve menu-bar labels are still inert; that's a future addendum each.
+Ln/Col/Pos stay hard-coded -- ARKlight can't read the caret yet (see
+the addendum's Stage 3 amendment).
 
 ## What belongs here
 
@@ -39,8 +43,10 @@ that's a future addendum each.
   tab list), named and commented so later stages know exactly what
   they're replacing with real state.
 - `tests/test_site.py` -- build smoke tests: every route builds, the
-  eight shell regions appear in the reference screenshot's order, and
-  all thirteen menu labels are present and correctly ordered.
+  eight shell regions appear in the reference screenshot's order, all
+  thirteen menu labels are present and correctly ordered, the File
+  menu and toolbar behave as described above, and the editor-bound
+  status fields are live while caret/file-dependent ones aren't.
 - `ARK/` -- build output (`arklight build site.py`), gitignored, not
   committed.
 
